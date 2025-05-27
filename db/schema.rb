@@ -12,7 +12,7 @@
 
 ActiveRecord::Schema[8.0].define(version: 2025_05_26_094243) do
   create_table "transactions", force: :cascade do |t|
-    t.date "transaction_date", null: false
+    t.datetime "transaction_datetime", null: false
     t.decimal "amount", precision: 10, scale: 2, null: false
     t.string "description", null: false
     t.string "category", default: "Uncategorized"
@@ -23,8 +23,8 @@ ActiveRecord::Schema[8.0].define(version: 2025_05_26_094243) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["category"], name: "index_transactions_on_category"
-    t.index ["transaction_date", "transaction_type"], name: "index_transactions_on_transaction_date_and_transaction_type"
-    t.index ["transaction_date"], name: "index_transactions_on_transaction_date"
+    t.index ["transaction_datetime", "transaction_type"], name: "idx_on_transaction_datetime_transaction_type_be325984ca"
+    t.index ["transaction_datetime"], name: "index_transactions_on_transaction_datetime"
     t.index ["transaction_type"], name: "index_transactions_on_transaction_type"
   end
 end

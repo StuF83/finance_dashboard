@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class Transaction < ApplicationRecord
-  validates :transaction_date, presence: true
+  validates :transaction_datetime, presence: true
   validates :amount, presence: true, numericality: true
   validates :description, presence: true, length: { minimum: 1, maximum: 255 }
   validates :category, presence: true
@@ -9,7 +9,7 @@ class Transaction < ApplicationRecord
 
   scope :income, -> { where(transaction_type: "income") }
   scope :expenses, -> { where(transaction_type: "expense") }
-  scope :in_date_range, ->(start_date, end_date) { where(transaction_date: start_date..end_date) }
+  scope :in_date_range, ->(start_date, end_date) { where(transaction_datetime: start_date..end_date) }
   scope :by_category, ->(category) { where(category: category) }
   scope :recent, -> { order(transaction_date: :desc) }
 
@@ -76,16 +76,10 @@ class Transaction < ApplicationRecord
 
     results
   end
-
   def self.create_from_csv_row(row, options = {})
-    # Customize these mappings based on your bank's CSV format
-    date_column = options[:date_column] || :date
-    amount_column = options[:amount_column] || :amount
-    description_column = options[:description_column] || :name
-
     transaction_data = {
-      transaction_date: parse_date(row[date_column]),
-      amount: parse_amount(row[amount_column]),
+      transaction_datetime: parse_datetime(row[:date], row[:time]),
+      amount: parse_amount(row[:amount]),
       description: build_description(row),
       category: row[:category]&.strip || "Uncategorized",
       account_name: row[:currency]&.strip,
@@ -102,18 +96,38 @@ class Transaction < ApplicationRecord
 
   def self.build_description(row)
     parts = []
-    parts << row[:name]&.strip if row[:name].present?
-    parts << row[:emoji] if row[:emoji].present?
-    parts << row[:description]&.strip if row[:description].present? && row[:description] != row[:name]
+    if row[:name].present?
+      parts << row[:name].strip
+      parts << row[:emoji] if row[:emoji].present?
+    elsif row[:description].present?
+      parts << row[:description]
+    else
+      parts << "unknown transaction"
+    end
 
     parts.join(" ").strip
   end
+
+  # def self.build_description(row)
+  #   name        = row[:name].to_s.strip
+  #   description = row[:description].to_s.strip
+  #   emoji       = row[:emoji].to_s.strip
+  #
+  #   if name.present?
+  #     [ name, emoji.presence ].compact.join(" ")
+  #   elsif description.present?
+  #     description
+  #   else
+  #     "unknown transaction"
+  #   end
+  # end
 
   def self.build_notes(row)
     notes_parts = []
     notes_parts << row[:notes_and_tags]&.strip if row[:notes_and_tags].present?
     notes_parts << "Address: #{row[:address]}" if row[:address].present?
     notes_parts << "Type: #{row[:type]}" if row[:type].present?
+    notes_parts << "Receipt: #{row[:receipt]}" if row[:receipt].present?  # ✅ Add receipt
 
     notes_parts.join(" | ")
   end
@@ -126,28 +140,30 @@ class Transaction < ApplicationRecord
     self.transaction_type = amount.to_f >= 0 ? "income" : "expense"
   end
   def clean_description
-    self.description = description.strip.squeeze(" ")
+    self.description = description.strip.squeeze(" ") if description.present?  # ✅ Add safety check
   end
 
-  def self.parse_date(date_string)
+  def self.parse_datetime(date_string, time_string)
     return nil if date_string.blank?
 
-    # Handle common date formats
-    Date.parse(date_string.to_s)
-  rescue ArgumentError
-    nil
+    begin
+      date = Date.parse(date_string.to_s)
+
+      if time_string.present?
+        # Combine date and time
+        time = Time.parse(time_string.to_s)
+        DateTime.new(date.year, date.month, date.day, time.hour, time.min, time.sec)
+      else
+        # Just use date at midnight
+        date.to_datetime
+      end
+    rescue ArgumentError => e
+      Rails.logger.warn "Failed to parse datetime: date=#{date_string}, time=#{time_string} - #{e.message}"
+      nil
+    end
   end
 
-  def self.parse_amount(amount_string)
-    return 0 if amount_string.blank?
-
-    # Remove currency symbols and commas, handle parentheses for negative amounts
-    cleaned = amount_string.to_s.gsub(/[$,]/, "")
-
-    if cleaned.match(/\((.*)\)/)
-      -cleaned.gsub(/[()]/, "").to_f
-    else
-      cleaned.to_f
-    end
+  def self.parse_amount(amount_value)
+    amount_value || 0.0
   end
 end
