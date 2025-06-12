@@ -55,81 +55,7 @@ class Transaction < ApplicationRecord
 
   # CSV Import functionality
   def self.import_from_csv(file_path, options = {})
-    require "csv"
-
-    results = { imported: 0, skipped: 0, errors: [] }
-
-    CSV.foreach(file_path, headers: true, header_converters: :symbol) do |row|
-      begin
-        transaction = create_from_csv_row(row, options)
-        if transaction.persisted?
-          results[:imported] += 1
-        else
-          results[:errors] << "Row #{$.}: #{transaction.errors.full_messages.join(', ')}"
-          results[:skipped] += 1
-        end
-      rescue => e
-        results[:errors] << "Row #{$.}: #{e.message}"
-        results[:skipped] += 1
-      end
-    end
-
-    results
-  end
-  def self.create_from_csv_row(row, options = {})
-    transaction_data = {
-      transaction_datetime: parse_datetime(row[:date], row[:time]),
-      amount: parse_amount(row[:amount]),
-      description: build_description(row),
-      category: row[:category]&.strip || "Uncategorized",
-      account_name: row[:currency]&.strip,
-      reference_number: row[:transaction_id]&.strip,
-      notes: build_notes(row)
-    }
-
-    # Add any additional CSV columns you might have
-    transaction_data[:category] = row[:category]&.strip if row[:category]
-    transaction_data[:notes] = row[:notes]&.strip if row[:notes]
-
-    create(transaction_data)
-  end
-
-  def self.build_description(row)
-    parts = []
-    if row[:name].present?
-      parts << row[:name].strip
-      parts << row[:emoji] if row[:emoji].present?
-    elsif row[:description].present?
-      parts << row[:description]
-    else
-      parts << "unknown transaction"
-    end
-
-    parts.join(" ").strip
-  end
-
-  # def self.build_description(row)
-  #   name        = row[:name].to_s.strip
-  #   description = row[:description].to_s.strip
-  #   emoji       = row[:emoji].to_s.strip
-  #
-  #   if name.present?
-  #     [ name, emoji.presence ].compact.join(" ")
-  #   elsif description.present?
-  #     description
-  #   else
-  #     "unknown transaction"
-  #   end
-  # end
-
-  def self.build_notes(row)
-    notes_parts = []
-    notes_parts << row[:notes_and_tags]&.strip if row[:notes_and_tags].present?
-    notes_parts << "Address: #{row[:address]}" if row[:address].present?
-    notes_parts << "Type: #{row[:type]}" if row[:type].present?
-    notes_parts << "Receipt: #{row[:receipt]}" if row[:receipt].present?  # ✅ Add receipt
-
-    notes_parts.join(" | ")
+    TransactionCsvImportService.new(file_path, options).call
   end
 
   private
@@ -139,31 +65,8 @@ class Transaction < ApplicationRecord
 
     self.transaction_type = amount.to_f >= 0 ? "income" : "expense"
   end
+
   def clean_description
-    self.description = description.strip.squeeze(" ") if description.present?  # ✅ Add safety check
-  end
-
-  def self.parse_datetime(date_string, time_string)
-    return nil if date_string.blank?
-
-    begin
-      date = Date.parse(date_string.to_s)
-
-      if time_string.present?
-        # Combine date and time
-        time = Time.parse(time_string.to_s)
-        DateTime.new(date.year, date.month, date.day, time.hour, time.min, time.sec)
-      else
-        # Just use date at midnight
-        date.to_datetime
-      end
-    rescue ArgumentError => e
-      Rails.logger.warn "Failed to parse datetime: date=#{date_string}, time=#{time_string} - #{e.message}"
-      nil
-    end
-  end
-
-  def self.parse_amount(amount_value)
-    amount_value || 0.0
+    self.description = description.strip.squeeze(" ")
   end
 end
