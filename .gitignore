@@ -38,3 +38,6 @@
 
 # Ignore Jetbrains config
 /.idea/
+
+# Ignore Notes File
+/NOTES.md
