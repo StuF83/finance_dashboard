@@ -1,2 +1,77 @@
-<h1>Finances#index</h1>
-<p>Find me in app/views/finances/index.html.erb</p>
+<div class="dashboard-container">
+  <header class="dashboard-header">
+    <h1>Finance Dashboard</h1>
+    <p class="subtitle">Your financial overview</p>
+  </header>
+
+  <!-- Summary Cards -->
+  <div class="summary-cards">
+    <div class="card income-card">
+      <h3>Total Income</h3>
+      <p class="amount">£<%= number_with_precision(@total_income, precision: 2) %></p>
+      <small>This month</small>
+    </div>
+    
+    <div class="card expense-card">
+      <h3>Total Expenses</h3>
+      <p class="amount">£<%= number_with_precision(@total_expenses, precision: 2) %></p>
+      <small>This month</small>
+    </div>
+    
+    <div class="card balance-card">
+      <h3>Net Balance</h3>
+      <p class="amount <%= @net_balance >= 0 ? 'positive' : 'negative' %>">
+        £<%= number_with_precision(@net_balance, precision: 2) %>
+      </p>
+      <small>This month</small>
+    </div>
+  </div>
+
+  <!-- Recent Transactions -->
+  <div class="recent-transactions">
+    <h2>Recent Transactions</h2>
+    
+    <% if @recent_transactions.any? %>
+      <div class="transactions-table">
+        <div class="table-header">
+          <div class="col-date">Date</div>
+          <div class="col-description">Description</div>
+          <div class="col-category">Category</div>
+          <div class="col-amount">Amount</div>
+        </div>
+        
+        <% @recent_transactions.each do |transaction| %>
+          <div class="transaction-row">
+            <div class="col-date">
+              <%= transaction.transaction_date.strftime("%d/%m/%Y") %>
+            </div>
+            <div class="col-description">
+              <%= truncate(transaction.description, length: 40) %>
+            </div>
+            <div class="col-category">
+              <span class="category-tag"><%= transaction.category %></span>
+            </div>
+            <div class="col-amount <%= transaction.transaction_type %>">
+              <%= transaction.transaction_type == 'expense' ? '-' : '+' %>£<%= number_with_precision(transaction.amount.abs, precision: 2) %>
+            </div>
+          </div>
+        <% end %>
+      </div>
+    <% else %>
+      <div class="empty-state">
+        <p>No transactions found.</p>
+        <p><small>Import your CSV file to get started.</small></p>
+      </div>
+    <% end %>
+  </div>
+
+  <!-- Quick Actions -->
+  <div class="quick-actions">
+    <h3>Quick Actions</h3>
+    <div class="action-buttons">
+      <%= link_to "Import CSV", "#", class: "btn btn-primary" %>
+      <%= link_to "View All Transactions", "#", class: "btn btn-secondary" %>
+      <%= link_to "Category Breakdown", "#", class: "btn btn-secondary" %>
+    </div>
+  </div>
+</div>

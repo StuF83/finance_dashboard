@@ -16,17 +16,12 @@ class TransactionCsvService
     results
   end
 
-  # For backward compatibility
-  def fetch
-    fetch_and_import
-  end
-
   private
 
   attr_reader :csv_path
 
   def default_csv_path
-    Rails.root.join('db', 'monzo_transactions.csv')
+    Rails.root.join('db', 'sample_data', 'monzo_transactions.csv')
   end
 
   def validate_csv_exists!

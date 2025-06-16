@@ -1,0 +1,93 @@
+@import 'variables';
+@import 'mixins';
+
+.recent-transactions {
+  margin-bottom: $spacing-xxl;
+
+  h2 {
+    color: $text-primary;
+    margin-bottom: $spacing-md;
+  }
+}
+
+.transactions-table {
+  @include card-base($padding: 0);
+  overflow: hidden;
+
+  .table-header {
+    @include grid-layout(100px 1fr 150px 120px, $spacing-md);
+    padding: $spacing-md;
+    background: $bg-light;
+    font-weight: 600;
+    color: $text-primary;
+    border-bottom: 1px solid #dee2e6;
+  }
+
+  .transaction-row {
+    @include grid-layout(100px 1fr 150px 120px, $spacing-md);
+    padding: $spacing-md;
+    border-bottom: 1px solid #f1f3f4;
+    align-items: center;
+    transition: background-color $transition-fast;
+
+    &:last-child {
+      border-bottom: none;
+    }
+
+    &:hover {
+      background: $bg-light;
+    }
+
+    .col-amount {
+      text-align: right;
+      font-weight: 600;
+
+      &.income {
+        color: $income-color;
+      }
+
+      &.expense {
+        color: $expense-color;
+      }
+    }
+
+    .category-tag {
+      background: $bg-light;
+      padding: $spacing-xs $spacing-sm;
+      border-radius: $border-radius-lg;
+      font-size: $font-size-sm;
+      color: $text-secondary;
+    }
+  }
+
+  // Responsive table
+  @include respond-to('md') {
+    .table-header,
+    .transaction-row {
+      grid-template-columns: 80px 1fr 100px 80px;
+      gap: $spacing-sm;
+      font-size: $font-size-sm;
+    }
+  }
+
+  @include respond-to('sm') {
+    .table-header,
+    .transaction-row {
+      grid-template-columns: 70px 1fr 70px;
+      gap: $spacing-xs;
+      font-size: $font-size-sm;
+      padding: 0.75rem;
+    }
+
+    .col-category {
+      display: none;
+    }
+  }
+}
+
+// Empty State
+.empty-state {
+  text-align: center;
+  padding: $spacing-xxl;
+  color: $text-muted;
+}

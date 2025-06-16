@@ -1,0 +1,60 @@
+@import 'variables';
+@import 'mixins';
+
+// Base styles and CSS reset
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  background-color: $bg-secondary;
+  font-family: $font-family;
+  line-height: 1.6;
+  color: $text-primary;
+}
+
+// Typography
+h1, h2, h3, h4, h5, h6 {
+  margin: 0;
+  font-weight: 600;
+  color: $text-primary;
+}
+
+h1 { font-size: $font-size-xxl; }
+h2 { font-size: $font-size-xl; }
+h3 { font-size: $font-size-lg; }
+
+p {
+  margin: 0 0 $spacing-md 0;
+}
+
+a {
+  color: $primary-color;
+  text-decoration: none;
+  transition: color $transition-fast;
+
+  &:hover {
+    color: darken($primary-color, 10%);
+    text-decoration: underline;
+  }
+}
+
+// Utility classes using variables
+.text-center { text-align: center; }
+.text-right { text-align: right; }
+.text-left { text-align: left; }
+
+// Spacing utilities (generated with loop)
+@for $i from 1 through 4 {
+  .mb-#{$i} { margin-bottom: #{$i * 0.25}rem; }
+  .mt-#{$i} { margin-top: #{$i * 0.25}rem; }
+  .p-#{$i} { padding: #{$i * 0.25}rem; }
+}
+
+// Color utilities
+.text-muted { color: $text-muted; }
+.text-primary { color: $text-primary; }
+.text-success { color: $success-color; }
+.text-danger { color: $danger-color; }

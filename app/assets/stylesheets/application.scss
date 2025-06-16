@@ -8,3 +8,17 @@
  *
  * Consider organizing styles into separate files for maintainability.
  */
+
+
+@import 'variables';
+@import 'mixins';
+
+// Import base styles
+@import 'base';
+
+// Import component styles
+@import 'components';
+
+// Import feature-specific styles
+@import 'dashboard';
+@import 'transactions';

@@ -1,0 +1,76 @@
+@import 'variables';
+@import 'mixins';
+
+.dashboard-container {
+  max-width: $container-max-width;
+  margin: 0 auto;
+  padding: $spacing-xl;
+  font-family: $font-family;
+}
+
+.dashboard-header {
+  text-align: center;
+  margin-bottom: $spacing-xl;
+
+  h1 {
+    color: $text-primary;
+    margin-bottom: $spacing-sm;
+  }
+
+  .subtitle {
+    color: $text-muted;
+    font-size: $font-size-lg;
+  }
+}
+
+// Summary Cards
+.summary-cards {
+  @include grid-layout(repeat(auto-fit, minmax(250px, 1fr)), $spacing-lg);
+  margin-bottom: $spacing-xxl;
+}
+
+.card {
+  @include card-base;
+  text-align: center;
+
+  h3 {
+    margin: 0 0 $spacing-md 0;
+    color: $text-secondary;
+    font-size: $font-size-base;
+    font-weight: 600;
+  }
+
+  .amount {
+    @include amount-style($text-primary);
+  }
+
+  small {
+    color: $text-muted;
+    font-size: $font-size-sm;
+  }
+
+  // Card variants using nesting and variables
+  &.income-card {
+    .amount {
+      @include amount-style($income-color);
+    }
+  }
+
+  &.expense-card {
+    .amount {
+      @include amount-style($expense-color);
+    }
+  }
+
+  &.balance-card {
+    .amount {
+      &.positive {
+        @include amount-style($income-color);
+      }
+
+      &.negative {
+        @include amount-style($expense-color);
+      }
+    }
+  }
+}

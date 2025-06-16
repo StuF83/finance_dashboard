@@ -16,6 +16,7 @@ class Transaction < ApplicationRecord
   before_validation :set_transaction_type
   before_validation :clean_description
 
+  #TODO read this
   def self.total_income(start_date = nil, end_date = nil)
     scope = income
     scope = scope.in_date_range(start_date, end_date) if start_date && end_date
