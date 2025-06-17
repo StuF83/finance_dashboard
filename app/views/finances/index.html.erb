@@ -43,7 +43,7 @@
         <% @recent_transactions.each do |transaction| %>
           <div class="transaction-row">
             <div class="col-date">
-              <%= transaction.transaction_date.strftime("%d/%m/%Y") %>
+              <%= transaction.transaction_datetime.strftime("%d/%m/%Y") %>
             </div>
             <div class="col-description">
               <%= truncate(transaction.description, length: 40) %>

@@ -13,5 +13,11 @@ Rails.application.routes.draw do
   # Defines the root path route ("/")
   root "finances#index"
 
+  resources :finances, only: [:index] do
+    collection do
+      post :import_csv
+    end
+  end
+
   get "finances", to: "finances#index"
 end

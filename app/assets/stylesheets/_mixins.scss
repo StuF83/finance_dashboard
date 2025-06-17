@@ -1,0 +1,70 @@
+// Card mixin for consistent card styling
+@mixin card-base($padding: $spacing-lg) {
+  background: $bg-primary;
+  padding: $padding;
+  border-radius: $border-radius;
+  box-shadow: $shadow-md;
+}
+
+// Button mixin for consistent button styling
+@mixin button-base($bg-color, $text-color: white) {
+  padding: 0.75rem 1.5rem;
+  border-radius: 6px;
+  text-decoration: none;
+  font-weight: 500;
+  display: inline-block;
+  transition: all $transition-fast;
+  border: none;
+  cursor: pointer;
+  font-size: $font-size-base;
+  background: $bg-color;
+  color: $text-color;
+
+  &:hover {
+    background: darken($bg-color, 8%);
+    color: $text-color;
+    text-decoration: none;
+  }
+}
+
+// Grid layout mixin
+@mixin grid-layout($columns: 1fr, $gap: $spacing-lg) {
+  display: grid;
+  grid-template-columns: $columns;
+  gap: $gap;
+}
+
+// Responsive breakpoint mixin
+@mixin respond-to($breakpoint) {
+  @if $breakpoint == 'sm' {
+    @media (max-width: $breakpoint-sm) {
+      @content;
+    }
+  }
+  @if $breakpoint == 'md' {
+    @media (max-width: $breakpoint-md) {
+      @content;
+    }
+  }
+  @if $breakpoint == 'lg' {
+    @media (max-width: $breakpoint-lg) {
+      @content;
+    }
+  }
+}
+
+// Text utilities mixin
+@mixin text-truncate($width: 100%) {
+  width: $width;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+// Amount styling mixin
+@mixin amount-style($color, $size: $font-size-xxl) {
+  font-size: $size;
+  font-weight: bold;
+  color: $color;
+  margin: 0 0 $spacing-sm 0;
+}

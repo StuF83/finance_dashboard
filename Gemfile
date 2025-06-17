@@ -63,3 +63,5 @@ group :test do
 end
 
 gem 'csv'
+
+gem "cssbundling-rails", "~> 1.4"

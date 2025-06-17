@@ -11,12 +11,11 @@ class Transaction < ApplicationRecord
   scope :expenses, -> { where(transaction_type: "expense") }
   scope :in_date_range, ->(start_date, end_date) { where(transaction_datetime: start_date..end_date) }
   scope :by_category, ->(category) { where(category: category) }
-  scope :recent, -> { order(transaction_date: :desc) }
+  scope :recent, -> { order(transaction_datetime: :desc) }
 
   before_validation :set_transaction_type
   before_validation :clean_description
 
-  #TODO read this
   def self.total_income(start_date = nil, end_date = nil)
     scope = income
     scope = scope.in_date_range(start_date, end_date) if start_date && end_date
