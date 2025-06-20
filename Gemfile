@@ -49,6 +49,8 @@ group :development, :test do
 
   # Omakase Ruby styling [https://github.com/rails/rubocop-rails-omakase/]
   gem "rubocop-rails-omakase", require: false
+
+  gem "rubocop", require: false
 end
 
 group :development do
@@ -62,6 +64,6 @@ group :test do
   gem "selenium-webdriver"
 end
 
-gem 'csv'
+gem "csv"
 
 gem "cssbundling-rails", "~> 1.4"

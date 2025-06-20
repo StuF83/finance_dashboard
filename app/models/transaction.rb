@@ -12,6 +12,7 @@ class Transaction < ApplicationRecord
   scope :in_date_range, ->(start_date, end_date) { where(transaction_datetime: start_date..end_date) }
   scope :by_category, ->(category) { where(category: category) }
   scope :recent, -> { order(transaction_datetime: :desc) }
+  scope :income_in_range, ->(start_date, end_date) { income.in_date_range(start_date, end_date) }
 
   before_validation :set_transaction_type
   before_validation :clean_description
@@ -38,6 +39,12 @@ class Transaction < ApplicationRecord
     scope.group(:category).sum(:amount).transform_values(&:abs)
   end
 
+  def self.income_by_category(start_date = nil, end_date = nil)
+    scope = income
+    scope = scope.in_date_range(start_date, end_date) if start_date && end_date
+    scope.group(:category).sum(:amount)
+  end
+
   def self.monthly_summary(months = 12)
     start_date = months.months.ago.beginning_of_month
 
@@ -51,6 +58,24 @@ class Transaction < ApplicationRecord
         expenses: total_expenses(month_start, month_end)
       }
     end
+  end
+
+    def self.category_stats(start_date = nil, end_date = nil)
+    scope = expenses
+    scope = scope.in_date_range(start_date, end_date) if start_date && end_date
+
+    {
+      total_categories: scope.distinct.count(:category),
+      avg_per_category: scope.group(:category).average(:amount),
+      transactions_per_category: scope.group(:category).count
+    }
+  end
+
+  def self.top_spending_categories(limit = 10, start_date = nil, end_date = nil)
+    spending_by_category(start_date, end_date)
+      .sort_by { |_, amount| -amount }
+      .first(limit)
+      .to_h
   end
 
   # CSV Import functionality

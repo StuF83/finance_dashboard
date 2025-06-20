@@ -16,6 +16,8 @@ Rails.application.routes.draw do
   resources :finances, only: [:index] do
     collection do
       post :import_csv
+      get :categories           # New route for category breakdown
+      get :category_details     # AJAX endpoint for detailed view
     end
   end
 
