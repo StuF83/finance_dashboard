@@ -1,1 +1,58 @@
-<p> hello categories </p>
+<% content_for :title, "Category Breakdown" %>
+
+<div class="category-breakdown-container">
+  <div class="header-section">
+    <h1 class="page-title">💰 Category Breakdown</h1>
+    <p class="page-subtitle">
+      Analyze your spending patterns by category
+      (<%= @date_range[:start].strftime("%B %Y") %> 
+      <% if @date_range[:start].month != @date_range[:end].month %>
+        to <%= @date_range[:end].strftime("%B %Y") %>
+      <% end %>)
+    </p>
+  </div>
+
+  <!-- Filter Section -->
+  <%= render 'category_filters' %>
+
+  <!-- Summary Stats -->
+  <div class="summary-stats">
+    <div class="stat-card">
+      <div class="stat-value">£<%= number_with_delimiter(@total_amount, delimiter: ',') %></div>
+      <div class="stat-label">Total <%= @transaction_type.capitalize %></div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value"><%= @categories_with_percentages.count %></div>
+      <div class="stat-label">Categories</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value"><%= @transaction_counts.values.sum %></div>
+      <div class="stat-label">Transactions</div>
+    </div>
+  </div>
+
+  <!-- Chart Section -->
+  <div class="chart-section">
+    <%= render 'category_chart' %>
+  </div>
+
+  <!-- Category Grid -->
+  <div class="categories-grid">
+    <% @categories_with_percentages.each do |category, data| %>
+      <%= render 'category_card', 
+          category: category, 
+          amount: data[:amount], 
+          percentage: data[:percentage],
+          transaction_count: @transaction_counts[category] || 0 %>
+    <% end %>
+  </div>
+
+  <!-- Empty state -->
+  <% if @categories_with_percentages.empty? %>
+    <div class="empty-state">
+      <div class="empty-icon">📊</div>
+      <h3>No transactions found</h3>
+      <p>Try adjusting your filters or date range to see category data.</p>
+    </div>
+  <% end %>
+</div>

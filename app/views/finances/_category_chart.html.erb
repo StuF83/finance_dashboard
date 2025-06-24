@@ -1,0 +1,29 @@
+<!-- ===== app/views/finances/_category_chart.html.erb ===== -->
+<div class="chart-container">
+  <h3 class="chart-title">Category Distribution</h3>
+  <div class="chart-wrapper">
+    <canvas id="categoryChart" 
+            data-controller="category-chart"
+            data-category-chart-categories-value="<%= @categories_with_percentages.keys.to_json %>"
+            data-category-chart-amounts-value="<%= @categories_with_percentages.values.map { |d| d[:amount] }.to_json %>"
+            data-category-chart-type-value="<%= @transaction_type %>">
+    </canvas>
+  </div>
+  
+  <!-- Chart Legend -->
+  <div class="chart-legend">
+    <% @categories_with_percentages.first(6).each_with_index do |(category, data), index| %>
+      <div class="legend-item">
+        <div class="legend-color" style="background-color: <%= chart_color(index) %>"></div>
+        <span class="legend-label"><%= category %></span>
+        <span class="legend-amount">£<%= number_with_delimiter(data[:amount]) %></span>
+      </div>
+    <% end %>
+    <% if @categories_with_percentages.count > 6 %>
+      <div class="legend-item">
+        <div class="legend-color" style="background-color: #95a5a6"></div>
+        <span class="legend-label">Others (<%= @categories_with_percentages.count - 6 %> categories)</span>
+      </div>
+    <% end %>
+  </div>
+</div>

@@ -1,0 +1,29 @@
+<!-- ===== app/views/finances/_category_card.html.erb ===== -->
+<div class="category-card" 
+     data-category="<%= category %>"
+     data-controller="category-card"
+     data-action="click->category-card#showDetails">
+  
+  <div class="category-header">
+    <h3 class="category-name">
+      <%= category_icon(category) %> <%= category %>
+    </h3>
+    <div class="category-amount">
+      £<%= number_with_delimiter(amount, delimiter: ',') %>
+    </div>
+  </div>
+  
+  <div class="category-stats">
+    <div class="percentage-bar">
+      <div class="percentage-fill" style="width: <%= percentage %>%"></div>
+    </div>
+    <div class="category-meta">
+      <span class="percentage"><%= percentage %>%</span>
+      <span class="transaction-count"><%= pluralize(transaction_count, 'transaction') %></span>
+    </div>
+  </div>
+  
+  <div class="category-details" data-category-card-target="details" style="display: none;">
+    <!-- This will be populated via AJAX when card is clicked -->
+  </div>
+</div>

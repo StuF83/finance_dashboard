@@ -7,11 +7,8 @@ class TransactionCsvService
 
   def fetch_and_import
     validate_csv_exists!
-    
     Rails.logger.info "Starting CSV import from: #{@csv_path}"
-    
     results = Transaction.import_from_csv(@csv_path)
-    
     log_import_results(results)
     results
   end
@@ -34,7 +31,7 @@ class TransactionCsvService
     Rails.logger.info "CSV import completed:"
     Rails.logger.info "  - Imported: #{results[:imported]} transactions"
     Rails.logger.info "  - Skipped: #{results[:skipped]} transactions"
-    
+
     if results[:errors].any?
       Rails.logger.warn "  - Errors encountered:"
       results[:errors].each { |error| Rails.logger.warn "    #{error}" }

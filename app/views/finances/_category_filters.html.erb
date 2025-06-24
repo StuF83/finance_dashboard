@@ -1,0 +1,41 @@
+<div class="filters-section">
+  <%= form_with url: categories_finances_path, method: :get, 
+      data: { controller: "auto-submit" }, local: true, class: "filters-form" do |form| %>
+    
+    <div class="filter-group">
+      <%= form.label :date_range, "Date Range", class: "filter-label" %>
+      <%= form.select :date_range, [
+        ['This Month', 'this_month'],
+        ['Last Month', 'last_month'], 
+        ['Last 3 Months', 'last_3_months'],
+        ['Last 6 Months', 'last_6_months'],
+        ['This Year', 'this_year']
+      ], { selected: params[:date_range] || 'this_month' }, 
+      { class: "filter-input", data: { action: "change->auto-submit#submit" } } %>
+    </div>
+
+    <div class="filter-group">
+      <%= form.label :transaction_type, "Type", class: "filter-label" %>
+      <%= form.select :transaction_type, [
+        ['Expenses Only', 'expense'],
+        ['Income Only', 'income'],
+        ['All Transactions', 'all']
+      ], { selected: params[:transaction_type] || 'expense' }, 
+      { class: "filter-input", data: { action: "change->auto-submit#submit" } } %>
+    </div>
+
+    <div class="filter-group">
+      <%= form.label :min_amount, "Min Amount (£)", class: "filter-label" %>
+      <%= form.number_field :min_amount, 
+          value: params[:min_amount],
+          step: 0.01,
+          placeholder: "0.00",
+          class: "filter-input",
+          data: { action: "change->auto-submit#submit" } %>
+    </div>
+
+    <div class="filter-group">
+      <%= form.submit "Apply Filters", class: "filter-submit-btn" %>
+    </div>
+  <% end %>
+</div>

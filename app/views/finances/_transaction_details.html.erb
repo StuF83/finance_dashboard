@@ -1,0 +1,32 @@
+<!-- ===== app/views/finances/_transaction_details.html.erb ===== -->
+<div class="transaction-details">
+  <div class="details-header">
+    <h4><%= @category %> Transactions</h4>
+    <button class="close-details" data-action="click->category-card#hideDetails">×</button>
+  </div>
+  
+  <div class="transaction-list">
+    <% @transactions.each do |transaction| %>
+      <div class="transaction-item">
+        <div class="transaction-info">
+          <div class="transaction-description"><%= transaction.description %></div>
+          <div class="transaction-date"><%= transaction.transaction_date.strftime("%b %d, %Y") %></div>
+          <% if transaction.notes.present? %>
+            <div class="transaction-notes"><%= transaction.notes %></div>
+          <% end %>
+        </div>
+        <div class="transaction-amount">
+          <span class="amount-value <%= transaction.transaction_type %>">
+            <%= transaction.transaction_type == 'expense' ? '-' : '+' %>£<%= number_with_delimiter(transaction.amount.abs) %>
+          </span>
+        </div>
+      </div>
+    <% end %>
+  </div>
+  
+  <% if @transactions.count >= 50 %>
+    <div class="load-more">
+      <p>Showing first 50 transactions. Use filters to narrow results.</p>
+    </div>
+  <% end %>
+</div>
