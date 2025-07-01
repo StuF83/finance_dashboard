@@ -33,6 +33,23 @@ module FinancesHelper
     colors[index % colors.length]
   end
 
+  def category_chart_colors
+  [
+      "#e74c3c", # Red
+      "#3498db", # Blue
+      "#2ecc71", # Green
+      "#f39c12", # Orange
+      "#9b59b6", # Purple
+      "#1abc9c", # Turquoise
+      "#34495e", # Dark Gray
+      "#e67e22", # Dark Orange
+      "#16a085", # Dark Turquoise
+      "#8e44ad", # Dark Purple
+      "#2980b9", # Dark Blue
+      "#27ae60"  # Dark Green
+  ]
+  end
+
   def format_currency(amount)
     "£#{number_with_delimiter(amount, delimiter: ",")}"
   end

@@ -2,6 +2,7 @@
   "name": "app",
   "private": "true",
   "dependencies": {
+    "chart.js": "^4.5.0",
     "sass": "^1.89.2"
   },
   "scripts": {

@@ -109,7 +109,7 @@
   }
 }
 
-// Chart Components
+// Chart Components - Enhanced for pie chart
 .chart-section {
   background: white;
   border-radius: 12px;
@@ -120,21 +120,62 @@
 
 .chart-container {
   position: relative;
+
+  .chart-header {
+    text-align: center;
+    margin-bottom: $spacing-lg;
+
+    h3 {
+      color: $text-primary;
+      font-size: $font-size-lg;
+      font-weight: 600;
+      margin: 0 0 $spacing-xs 0;
+    }
+
+    .chart-subtitle {
+      color: $text-secondary;
+      font-size: $font-size-sm;
+      margin: 0;
+    }
+  }
+
+  .chart-summary {
+    border-top: 1px solid #ecf0f1;
+    padding-top: $spacing-md;
+
+    .total-spending {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: $font-size-base;
+
+      .label {
+        color: $text-secondary;
+        font-weight: 500;
+      }
+
+      .amount {
+        color: $text-primary;
+        font-weight: 700;
+        font-size: $font-size-lg;
+      }
+    }
+  }
 }
 
 .chart-title {
   text-align: center;
   margin-bottom: 1rem;
-  color: #2c3e50;
+  color: $text-primary;
 }
 
 .chart-wrapper {
   position: relative;
-  height: 300px;
-  margin-bottom: 1rem;
-
-  @media (max-width: 768px) {
-    height: 250px;
+  height: 400px;
+  margin-bottom: $spacing-md;
+  
+  @include respond-to('md') {
+    height: 300px;
   }
 }
 
@@ -160,6 +201,15 @@
 .legend-amount {
   margin-left: auto;
   font-weight: 600;
+}
+
+// Responsive adjustments for chart container
+@include respond-to('md') {
+  .chart-container {
+    .chart-header h3 {
+      font-size: $font-size-base;
+    }
+  }
 }
 
 // Summary Stats Component (reusable)
