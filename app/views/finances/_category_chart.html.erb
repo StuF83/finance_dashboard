@@ -1,3 +1,21 @@
-<div style="width: 400px; height: 200px;">
-  <canvas data-controller="chart" width="400" height="200"></canvas>
+<div class="chart-container" 
+     data-controller="chart"
+     data-chart-categories-value='<%= @categories_with_percentages.to_json.html_safe %>'
+     data-chart-colors-value='<%= category_chart_colors.to_json.html_safe %>'>
+  
+  <div class="chart-header">
+    <h3>Category Breakdown</h3>
+    <p class="chart-subtitle">Spending distribution by category</p>
+  </div>
+  
+  <div class="chart-wrapper">
+    <canvas data-chart-target="canvas"></canvas>
+  </div>
+  
+  <div class="chart-summary">
+    <div class="total-spending">
+      <span class="label">Total Spending:</span>
+      <span class="amount">£<%= @categories_with_percentages.values.sum { |v| v[:amount] }.to_i.to_s.reverse.gsub(/(\d{3})(?=\d)/, '\\1,').reverse %></span>
+    </div>
+  </div>
 </div>

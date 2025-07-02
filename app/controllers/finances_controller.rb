@@ -39,7 +39,7 @@ class FinancesController < ApplicationController
     @total_amount = @categories_summary.values.sum.abs
     @categories_with_percentages = @categories_summary.map do |category, amount|
       percentage = @total_amount > 0 ? (amount.abs / @total_amount * 100).round(1) : 0
-      [category, { amount: amount.abs, percentage: percentage }]
+      [category, { amount: amount.abs.to_f, percentage: percentage.to_f }]
     end.to_h.sort_by { |_, data| -data[:amount] }.to_h
 
     # Get transaction count per category
