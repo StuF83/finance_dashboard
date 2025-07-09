@@ -23,7 +23,10 @@
   </head>
 
   <body>
-    <%= yield %>
+    <div class="page-container">
+      <%= yield %>
+      <%= yield :quick_actions %>
+    </div>
   </body>
 </html>
 

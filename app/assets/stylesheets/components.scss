@@ -1,6 +1,14 @@
 @import 'variables';
 @import 'mixins';
 
+// Page Container Styles
+.page-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: $spacing-xl;
+  font-family: $font-family;
+}
+
 // Quick Actions
 .quick-actions {
   h3 {
