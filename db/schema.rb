@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_05_26_094243) do
+ActiveRecord::Schema[8.0].define(version: 2025_07_11_051411) do
   create_table "transactions", force: :cascade do |t|
     t.datetime "transaction_datetime", null: false
     t.decimal "amount", precision: 10, scale: 2, null: false
@@ -18,11 +18,12 @@ ActiveRecord::Schema[8.0].define(version: 2025_05_26_094243) do
     t.string "category", default: "Uncategorized"
     t.string "transaction_type"
     t.string "account_name"
-    t.string "reference_number"
+    t.string "reference_number", null: false
     t.text "notes"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["category"], name: "index_transactions_on_category"
+    t.index ["reference_number"], name: "index_transactions_on_reference_number_unique", unique: true
     t.index ["transaction_datetime", "transaction_type"], name: "idx_on_transaction_datetime_transaction_type_be325984ca"
     t.index ["transaction_datetime"], name: "index_transactions_on_transaction_datetime"
     t.index ["transaction_type"], name: "index_transactions_on_transaction_type"

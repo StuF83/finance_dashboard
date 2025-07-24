@@ -6,6 +6,8 @@ class Transaction < ApplicationRecord
   validates :description, presence: true, length: { minimum: 1, maximum: 255 }
   validates :category, presence: true
   validates :transaction_type, inclusion: { in: %w[income expense] }
+  validates :reference_number, presence: { message: "is required - please ensure you're uploading a valid Monzo CSV export" }, 
+                               uniqueness: { message: "transaction already exists in database" }
 
   scope :income, -> { where(transaction_type: "income") }
   scope :expenses, -> { where(transaction_type: "expense") }

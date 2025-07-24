@@ -3,33 +3,97 @@
 class TransactionCsvImportService
   require "csv"
 
+  attr_reader :file_path, :options, :results
+
   def initialize(file_path, options = {})
     @file_path = file_path
     @options = options
-    @results = { imported: 0, skipped: 0, errors: [] }
+    @results = {
+      # Import statistics
+      imported: 0,
+      skipped: 0,
+
+      # Issue detection and user control
+      issues_detected: false,
+      issue_summary: [],
+      detailed_errors: [],
+      can_proceed: true,
+      total_processable: 0,
+
+      # Duplicate tracking
+      duplicate_transactions: []
+    }
   end
 
   def call
     validate_file_exists!
+    scan_for_issues
+    return results unless results[:can_proceed]
+    return results if results[:issues_detected] && !options[:force_proceed]
     import_transactions
-    @results
+    results
   end
 
-  attr_reader :file_path, :options, :results
+  private
 
   def validate_file_exists!
     raise ArgumentError, "File not found: #{file_path}" unless File.exist?(file_path)
   end
 
-  def import_transactions
+  def scan_for_issues
+    csv_transaction_ids = []
+    missing_id_count = 0
+    total_rows = 0
+
+    # First pass: collect all transaction IDs and count issues
     CSV.foreach(file_path, headers: true, header_converters: :symbol) do |row|
-      process_row(row)
+      total_rows += 1
+      transaction_id = row[:transaction_id]&.strip
+
+      if transaction_id.blank?
+        missing_id_count += 1
+        add_issue("Row #{total_rows}: Missing transaction ID", "Row #{total_rows}: Missing transaction ID - please ensure you're uploading a valid Monzo CSV export")
+        next
+      end
+
+      csv_transaction_ids << transaction_id
+    end
+
+    # Check for duplicates within CSV itself
+    csv_duplicates = csv_transaction_ids.group_by(&:itself).select { |_, v| v.size > 1 }.keys
+    mark_csv_duplicates_found(csv_duplicates)
+
+    # Check for existing transactions in database
+    existing_ids = Transaction.where(reference_number: csv_transaction_ids).pluck(:reference_number)
+    mark_duplicates_found(existing_ids)
+
+    # Record missing transaction IDs
+    mark_missing_transaction_ids(missing_id_count)
+
+    # Calculate processable transactions
+    unique_new_ids = csv_transaction_ids.uniq - existing_ids
+    set_processable_count(unique_new_ids.count)
+  end
+
+  def import_transactions
+    existing_ids = results[:duplicate_transactions] || []
+
+    CSV.foreach(file_path, headers: true, header_converters: :symbol) do |row|
+      process_row(row, existing_ids)
     end
   end
 
-  def process_row(row)
-    transaction = create_transaction_from_row(row)
+  def process_row(row, existing_ids = [])
+    transaction_id = row[:transaction_id]&.strip
 
+    return if transaction_id.blank?
+
+    if options[:skip_duplicates] && existing_ids.include?(transaction_id)
+      results[:skipped] += 1
+      return
+    end
+
+    transaction = create_transaction_from_row(row)
     if transaction.persisted?
       results[:imported] += 1
     else
@@ -101,12 +165,14 @@ class TransactionCsvImportService
   end
 
   def handle_transaction_errors(transaction)
-    results[:errors] << "Row #{$.}: #{transaction.errors.full_messages.join(', ')}"
+    error_msg = "Row #{$.}: #{transaction.errors.full_messages.join(', ')}"
+    add_issue("Transaction validation error", error_msg)
     results[:skipped] += 1
   end
 
   def handle_processing_error(error)
-    results[:errors] << "Row #{$.}: #{error.message}"
+    error_msg = "Row #{$.}: #{error.message}"
+    add_issue("Processing error", error_msg)
     results[:skipped] += 1
   end
 
@@ -121,5 +187,41 @@ class TransactionCsvImportService
 
   def description_column
     options[:description_column] || :name
+  end
+
+  # new helper methods
+  def add_issue(summary_text, detailed_error = nil)
+    results[:issues_detected] = true
+    results[:issue_summary] << summary_text unless results[:issue_summary].include?(summary_text)
+    results[:detailed_errors] << detailed_error if detailed_error
+  end
+
+  def set_processable_count(count)
+    results[:total_processable] = count
+  end
+
+  def mark_cannot_proceed(reason)
+    results[:can_proceed] = false
+    add_issue("Cannot proceed: #{reason}")
+  end
+
+  def mark_duplicates_found(duplicate_ids)
+    results[:duplicate_transactions] = duplicate_ids
+
+    if duplicate_ids.any?
+      add_issue("#{duplicate_ids.count} transactions already exist in database")
+    end
+  end
+
+  def mark_csv_duplicates_found(duplicate_ids)
+    if duplicate_ids.any?
+      add_issue("#{duplicate_ids.count} duplicate transaction IDs found within CSV file")
+    end
+  end
+
+  def mark_missing_transaction_ids(count)
+    if count > 0
+      add_issue("#{count} rows missing transaction IDs")
+    end
   end
 end
