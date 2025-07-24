@@ -1,6 +1,6 @@
 class FinancesController < ApplicationController
   def index
-  # Get current month's date range
+    # Get current month's date range
     start_of_month = Date.current.beginning_of_month
     end_of_month = Date.current.end_of_month
 
@@ -39,12 +39,12 @@ class FinancesController < ApplicationController
     @total_amount = @categories_summary.values.sum.abs
     @categories_with_percentages = @categories_summary.map do |category, amount|
       percentage = @total_amount > 0 ? (amount.abs / @total_amount * 100).round(1) : 0
-      [category, { amount: amount.abs.to_f, percentage: percentage.to_f }]
+      [ category, { amount: amount.abs.to_f, percentage: percentage.to_f } ]
     end.to_h.sort_by { |_, data| -data[:amount] }.to_h
 
     # Get transaction count per category
     @transaction_counts = Transaction.in_date_range(@date_range[:start], @date_range[:end])
-                                   .where(transaction_type: @transaction_type == 'all' ? ['income', 'expense'] : @transaction_type)
+                                   .where(transaction_type: @transaction_type == "all" ? [ "income", "expense" ] : @transaction_type)
                                    .group(:category).count
   end
 
@@ -53,7 +53,6 @@ class FinancesController < ApplicationController
     render json: { message: "Coming soon!" }
   end
 
-  # Add this method for CSV import functionality later
   def import_csv
     begin
       results = TransactionCsvService.new.fetch_and_import
@@ -67,16 +66,16 @@ class FinancesController < ApplicationController
 
   def parse_date_range(date_range_param)
     case date_range_param
-    when 'last_month'
+    when "last_month"
       start_date = 1.month.ago.beginning_of_month
       end_date = 1.month.ago.end_of_month
-    when 'last_3_months'
+    when "last_3_months"
       start_date = 3.months.ago.beginning_of_month
       end_date = Date.current.end_of_month
-    when 'last_6_months'
+    when "last_6_months"
       start_date = 6.months.ago.beginning_of_month
       end_date = Date.current.end_of_month
-    when 'this_year'
+    when "this_year"
       start_date = Date.current.beginning_of_year
       end_date = Date.current.end_of_year
     else # 'this_month' or default
