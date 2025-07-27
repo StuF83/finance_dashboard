@@ -52,12 +52,16 @@ class TransactionCsvImportService
 
       if transaction_id.blank?
         missing_id_count += 1
-        add_issue("Row #{total_rows}: Missing transaction ID", "Row #{total_rows}: Missing transaction ID - please ensure you're uploading a valid Monzo CSV export")
+        add_issue(detailed_error: "Row #{total_rows}: Missing transaction ID - please ensure you're uploading a valid Monzo CSV export")
         next
       end
 
       csv_transaction_ids << transaction_id
     end
+
+    # if missing_id_count > 0
+    #   results[:issue_summary] << "#{missing_id_count} rows missing required transaction IDs"
+    # end
 
     # Check for duplicates within CSV itself
     csv_duplicates = csv_transaction_ids.group_by(&:itself).select { |_, v| v.size > 1 }.keys
@@ -88,7 +92,7 @@ class TransactionCsvImportService
 
     return if transaction_id.blank?
 
-    if options[:skip_duplicates] && existing_ids.include?(transaction_id)
+    if existing_ids.include?(transaction_id)
       results[:skipped] += 1
       return
     end
@@ -166,17 +170,16 @@ class TransactionCsvImportService
 
   def handle_transaction_errors(transaction)
     error_msg = "Row #{$.}: #{transaction.errors.full_messages.join(', ')}"
-    add_issue("Transaction validation error", error_msg)
+    add_issue(summary_text: "Transaction validation error", detailed_error: error_msg)
     results[:skipped] += 1
   end
 
   def handle_processing_error(error)
     error_msg = "Row #{$.}: #{error.message}"
-    add_issue("Processing error", error_msg)
+    add_issue(summary_text: "Processing error", detailed_error: error_msg)
     results[:skipped] += 1
   end
 
-  # Column mapping methods - can be customized via options
   def date_column
     options[:date_column] || :date
   end
@@ -189,10 +192,9 @@ class TransactionCsvImportService
     options[:description_column] || :name
   end
 
-  # new helper methods
-  def add_issue(summary_text, detailed_error = nil)
+  def add_issue(summary_text: nil, detailed_error: nil)
     results[:issues_detected] = true
-    results[:issue_summary] << summary_text unless results[:issue_summary].include?(summary_text)
+    results[:issue_summary] << summary_text if summary_text.present? && !results[:issue_summary].include?(summary_text)
     results[:detailed_errors] << detailed_error if detailed_error
   end
 
@@ -202,26 +204,26 @@ class TransactionCsvImportService
 
   def mark_cannot_proceed(reason)
     results[:can_proceed] = false
-    add_issue("Cannot proceed: #{reason}")
+    add_issue(summary_text: "Cannot proceed: #{reason}")
   end
 
   def mark_duplicates_found(duplicate_ids)
     results[:duplicate_transactions] = duplicate_ids
 
     if duplicate_ids.any?
-      add_issue("#{duplicate_ids.count} transactions already exist in database")
+      add_issue(summary_text: "#{duplicate_ids.count} transactions already exist in database")
     end
   end
 
   def mark_csv_duplicates_found(duplicate_ids)
     if duplicate_ids.any?
-      add_issue("#{duplicate_ids.count} duplicate transaction IDs found within CSV file")
+      add_issue(summary_text: "#{duplicate_ids.count} duplicate transaction IDs found within CSV file")
     end
   end
 
   def mark_missing_transaction_ids(count)
     if count > 0
-      add_issue("#{count} rows missing transaction IDs")
+      add_issue(summary_text: "#{count} rows missing required transaction ID")
     end
   end
 end

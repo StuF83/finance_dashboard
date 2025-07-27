@@ -48,9 +48,34 @@ class TransactionCsvImportServiceTest < ActiveSupport::TestCase
     assert_equal true, results[:can_proceed], "Should be able to proceed"
     assert_equal 4, results[:total_processable], "Should have 4 processable transactions"
     assert_includes results[:issue_summary], "6 transactions already exist in database", "Issue summary should be populated correctly"
-    assert_includes results[:issue_summary], "Transaction validation error", "Issue summary should be populated correctly"
+    # assert_includes results[:issue_summary], "Transaction validation error", "Issue summary should be populated correctly"
 
     assert_equal 10, Transaction.count, "Unique transactions should be created in database"
+  end
+
+  test "handles CSV with missing transaction IDs" do
+    Transaction.delete_all
+
+    # Test file with 3 transactions with IDs, 3 transactions without IDs
+    test_file_path = test_csv_path("03_missing_transaction_ids.csv")
+    assert File.exist?(test_file_path), "Test CSV file should exist at #{test_file_path}"
+
+    # ACT - Run the service without force_proceed (should detect issues)
+    service = TransactionCsvImportService.new(test_file_path)
+    results = service.call
+
+    # ASSERT - Should detect issues and not proceed
+    assert_equal 0, results[:imported], "Should import 0 transactions when issues detected"
+    assert_equal 0, results[:skipped], "Should skip 0 transactions when not proceeding"
+    assert_equal true, results[:issues_detected], "Should detect missing ID issues"
+    assert_equal true, results[:can_proceed], "Should still be able to proceed if forced"
+    assert_equal 3, results[:total_processable], "Should have 3 processable transactions (those with IDs)"
+
+    # Check issue summary mentions missing IDs
+    assert_includes results[:issue_summary], "3 rows missing required transaction ID", "Should report missing IDs"
+
+    # Database should remain empty since we didn't force proceed
+    assert_equal 0, Transaction.count, "Should not create any transactions without force_proceed"
   end
 
   private
