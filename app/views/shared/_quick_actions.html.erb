@@ -2,7 +2,25 @@
 <div class="quick-actions">
   <h3>Quick Actions</h3>
   <div class="action-buttons">
-    <%= link_to "Import CSV", "#", class: "btn btn-primary" %>
+    <!-- File Upload Form with Stimulus Controller -->
+    <%= form_with url: transactions_import_path, multipart: true, local: true, 
+                  class: "csv-import-form", 
+                  data: { controller: "csv-import" } do |form| %>
+      
+      <%= form.file_field :csv_file, 
+                         accept: ".csv", 
+                         class: "csv-file-input",
+                         data: { 
+                           csv_import_target: "fileInput",
+                           action: "change->csv-import#handleFileChange"
+                         } %>
+      
+      <%= form.button "Import CSV", 
+                     type: "button", 
+                     class: "btn btn-primary", 
+                     data: { action: "click->csv-import#triggerFileInput" } %>
+    <% end %>
+    
     <%= link_to "View All Transactions", "#", class: "btn btn-secondary" %>
     <%= link_to "Category Breakdown", "#", class: "btn btn-secondary" %>
   </div>

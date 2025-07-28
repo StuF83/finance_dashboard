@@ -20,6 +20,9 @@
   background: $bg-color;
   color: $text-color;
 
+  font-family: inherit;
+  line-height: inherit;
+
   &:hover {
     background: darken($bg-color, 8%);
     color: $text-color;
