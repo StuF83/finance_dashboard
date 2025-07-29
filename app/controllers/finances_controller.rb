@@ -12,8 +12,6 @@ class FinancesController < ApplicationController
     # Get recent transactions (last 10)
     @recent_transactions = Transaction.recent.limit(10)
 
-    # Optional: Import CSV for testing (remove this later)
-    # TransactionCsvService.new.fetch_and_import if Transaction.count == 0
   end
 
   def categories
@@ -51,15 +49,6 @@ class FinancesController < ApplicationController
   def category_details
     # AJAX endpoint for detailed category view (we'll implement this later)
     render json: { message: "Coming soon!" }
-  end
-
-  def import_csv
-    begin
-      results = TransactionCsvService.new.fetch_and_import
-      redirect_to finances_path, notice: "Successfully imported #{results[:imported]} transactions"
-    rescue => e
-      redirect_to finances_path, alert: "Import failed: #{e.message}"
-    end
   end
 
   private
