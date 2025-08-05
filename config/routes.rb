@@ -22,4 +22,6 @@ Rails.application.routes.draw do
   end
 
   get "finances", to: "finances#index"
+
+  post "transactions/import", to: "finances#import", as: "transactions_import"
 end

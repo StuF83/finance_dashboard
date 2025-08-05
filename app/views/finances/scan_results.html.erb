@@ -1,0 +1,83 @@
+<div class="page-container">
+  <header class="scan-results-header">
+    <h1>CSV Import Review</h1>
+    <p class="subtitle">Please review the issues found in your CSV file</p>
+  </header>
+
+  <!-- Import Summary Card -->
+  <div class="scan-summary-card">
+    <h3>Import Summary</h3>
+    <div class="summary-stats">
+      <div class="stat-item good">
+        <div class="stat-number"><%= @results[:total_processable] %></div>
+        <div class="stat-label">Transactions Ready to Import</div>
+      </div>
+      
+      <div class="stat-item warning">
+        <div class="stat-number"><%= @results[:skipped] %></div>
+        <div class="stat-label">Issues Found</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Issues Detected -->
+  <% if @results[:issue_summary].any? %>
+    <div class="issues-card">
+      <h3>Issues Detected</h3>
+      <div class="issue-list">
+        <% @results[:issue_summary].each do |issue| %>
+          <div class="issue-item">
+            <span class="issue-icon">⚠️</span>
+            <span class="issue-text"><%= issue %></span>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  <% end %>
+
+  <!-- Detailed Errors (Collapsible) -->
+  <% if @results[:detailed_errors].any? %>
+    <div class="details-card">
+      <details>
+        <summary>Show Detailed Errors (<%= @results[:detailed_errors].count %> issues)</summary>
+        <div class="detailed-errors">
+          <% @results[:detailed_errors].each do |error| %>
+            <div class="error-item"><%= error %></div>
+          <% end %>
+        </div>
+      </details>
+    </div>
+  <% end %>
+
+  <!-- Action Buttons -->
+  <div class="scan-actions">
+    <% if @results[:total_processable] > 0 %>
+      <!-- Proceed Anyway Form -->
+      <%= form_with url: transactions_import_path, local: true, class: "proceed-form" do |form| %>
+        <%= form.hidden_field :force_proceed, value: "true" %>
+        
+        <div class="proceed-warning">
+          <p><strong>Proceed with import?</strong></p>
+          <p>This will import <strong><%= pluralize(@results[:total_processable], 'transaction') %></strong> and skip the problematic ones.</p>
+        </div>
+        
+        <div class="action-buttons">
+          <%= link_to "Cancel", root_path, class: "btn btn-secondary" %>
+          <%= form.submit "Import #{@results[:total_processable]} Transactions", 
+                         class: "btn btn-warning", 
+                         data: { confirm: "Are you sure you want to proceed with this import?" } %>
+        </div>
+      <% end %>
+    <% else %>
+      <!-- No valid transactions to import -->
+      <div class="no-import-message">
+        <p><strong>Cannot proceed with import.</strong></p>
+        <p>No valid transactions found to import. Please check your CSV file and try again.</p>
+        
+        <div class="action-buttons">
+          <%= link_to "Try Again", root_path, class: "btn btn-primary" %>
+        </div>
+      </div>
+    <% end %>
+  </div>
+</div>

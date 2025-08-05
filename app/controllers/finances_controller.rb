@@ -11,7 +11,31 @@ class FinancesController < ApplicationController
 
     # Get recent transactions (last 10)
     @recent_transactions = Transaction.recent.limit(10)
+  end
 
+    def import
+    begin
+
+      # Handle file upload or retrieve from session
+      file_path = get_file_path
+
+      return if file_path.nil? # Redirected with error
+      # Determine if this is scan or force proceed request
+      options = params[:force_proceed] == "true" ? { force_proceed: true } : {}
+
+      # Call the import service
+      @results = TransactionCsvImportService.new(file_path, options).call
+
+      # Handle results based on what happened
+      handle_import_results(options[:force_proceed])
+
+    rescue StandardError => e
+      flash[:error] = "Import failed: #{e.message}"
+      redirect_to root_path
+    ensure
+      # Clean up session if we're done (success or force_proceed)
+      cleanup_session_file if should_cleanup?
+    end
   end
 
   def categories
@@ -73,5 +97,121 @@ class FinancesController < ApplicationController
     end
 
     { start: start_date, end: end_date }
+  end
+
+  def validate_file_upload
+    @file_valid = true
+
+    unless params[:csv_file].present?
+      flash[:error] = "Please select a CSV file"
+      redirect_to root_path
+      @file_valid = false
+      return
     end
+
+    # Check file extension
+    filename = params[:csv_file].original_filename
+    unless filename.downcase.end_with?('.csv')
+      flash[:error] = "Please upload a CSV file (.csv extension required)"
+      redirect_to root_path
+      @file_valid = false
+      return
+    end
+
+    # Check file size (optional - adjust limit as needed)
+    if params[:csv_file].size > 10.megabytes
+      flash[:error] = "File too large. Please upload a CSV file smaller than 10MB"
+      redirect_to root_path
+      @file_valid = false
+      return
+    end
+  end
+
+  def handle_import_results(force_proceed)
+    if !@results[:can_proceed]
+      # Fatal issues - cannot proceed under any circumstances
+      error_message = "Cannot import CSV file"
+      error_message += ": #{@results[:issue_summary].join(', ')}" if @results[:issue_summary].any?
+      error_message += ". Please check your CSV file and try again."
+
+      flash[:error] = error_message
+      redirect_to root_path
+
+    elsif @results[:issues_detected] && !force_proceed
+      # Issues found but user can choose to proceed anyway
+      # Render scan results page with proceed option
+      render :scan_results
+
+    elsif @results[:issues_detected] && force_proceed
+      # Issues found but user chose to proceed - import completed with issues
+      message = build_completion_message_with_issues
+      flash[:warning] = message
+      redirect_to root_path
+
+    else
+      # No issues - clean import completed
+      flash[:success] = "Import successful! #{@results[:imported]} transactions imported."
+      redirect_to root_path
+    end
+  end
+
+  def get_file_path
+
+    if params[:csv_file].present?
+      # First request - validate and store file
+      validate_file_upload
+      return nil unless @file_valid # Error already set
+
+      # Store file path in session for potential second request
+      temp_file = Tempfile.new(["csv_import", ".csv"])
+      temp_file.binmode
+      temp_file.write(params[:csv_file].read)
+      temp_file.close
+      session[:csv_file_path] = temp_file.path
+      session[:csv_file_name] = params[:csv_file].original_filename
+
+      return session[:csv_file_path]
+
+    elsif session[:csv_file_path].present?
+      
+      # Second request (force proceed) - use stored path
+      unless File.exist?(session[:csv_file_path])
+        flash[:error] = "File session expired. Please upload your CSV again."
+        redirect_to root_path
+        return nil
+      end
+
+      return session[:csv_file_path]
+
+    else
+      # No file in request or session
+      flash[:error] = "Please select a CSV file to import"
+      redirect_to root_path
+      return nil
+    end
+  end
+
+  def build_completion_message_with_issues
+    message = "Import completed: #{@results[:imported]} transactions imported"
+    message += ", #{@results[:skipped]} skipped" if @results[:skipped] > 0
+
+    if @results[:issue_summary].any?
+      message += ". Issues: #{@results[:issue_summary].join(', ')}"
+    end
+
+    message
+  end
+
+  def should_cleanup?
+    # Clean up if we're redirecting (success/error) or if force_proceed was used
+    !performed? || params[:force_proceed] == "true"
+  end
+
+  def cleanup_session_file
+    if session[:csv_file_path] && File.exist?(session[:csv_file_path])
+      File.delete(session[:csv_file_path]) # Clean up our persistent temp file
+    end
+    session.delete(:csv_file_path)
+    session.delete(:csv_file_name)
+  end
 end

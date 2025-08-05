@@ -17,7 +17,7 @@ class TransactionCsvImportService
       issues_detected: false,
       issue_summary: [],
       detailed_errors: [],
-      can_proceed: true,
+      can_proceed: false,
       total_processable: 0,
 
       # Duplicate tracking
@@ -59,10 +59,6 @@ class TransactionCsvImportService
       csv_transaction_ids << transaction_id
     end
 
-    # if missing_id_count > 0
-    #   results[:issue_summary] << "#{missing_id_count} rows missing required transaction IDs"
-    # end
-
     # Check for duplicates within CSV itself
     csv_duplicates = csv_transaction_ids.group_by(&:itself).select { |_, v| v.size > 1 }.keys
     mark_csv_duplicates_found(csv_duplicates)
@@ -77,6 +73,30 @@ class TransactionCsvImportService
     # Calculate processable transactions
     unique_new_ids = csv_transaction_ids.uniq - existing_ids
     set_processable_count(unique_new_ids.count)
+
+    # DEFENSIVE LOGIC: Only allow proceed if we have valid transactions to import
+    if unique_new_ids.count > 0
+      # We have valid, new transactions to import
+      results[:can_proceed] = true
+
+    else
+      # No importable transactions - determine why and set appropriate message
+      if total_rows == 0
+        add_issue(summary_text: "CSV file appears to be empty")
+
+      elsif csv_transaction_ids.empty?
+        # We had rows but no valid transaction IDs
+        add_issue(summary_text: "No valid transaction IDs found in CSV file")
+
+      elsif csv_transaction_ids.any? && unique_new_ids.empty?
+        # We had valid IDs but they're all duplicates
+        add_issue(summary_text: "All transactions already exist in database")
+
+      else
+        # Fallback case (shouldn't happen but defensive)
+        add_issue(summary_text: "No importable transactions found")
+      end
+    end
   end
 
   def import_transactions
@@ -200,11 +220,6 @@ class TransactionCsvImportService
 
   def set_processable_count(count)
     results[:total_processable] = count
-  end
-
-  def mark_cannot_proceed(reason)
-    results[:can_proceed] = false
-    add_issue(summary_text: "Cannot proceed: #{reason}")
   end
 
   def mark_duplicates_found(duplicate_ids)

@@ -115,6 +115,18 @@
     color: darken($primary-color, 20%);
     border: 1px solid lighten($primary-color, 20%);
   }
+
+  &.alert-error {
+    background-color: lighten($danger-color, 40%);
+    color: darken($danger-color, 20%);
+    border: 1px solid lighten($danger-color, 20%);
+  }
+
+  &.alert-warning {
+    background-color: lighten(#f39c12, 40%); // Orange warning color
+    color: darken(#f39c12, 20%);
+    border: 1px solid lighten(#f39c12, 20%);
+  }
 }
 
 // Chart Components - Enhanced for pie chart
