@@ -40,7 +40,7 @@ class FinancesController < ApplicationController
 
   def categories
     # Parse date range from params (default to current month)
-    @date_range = parse_date_range(params[:date_range])
+    @date_range = DateRangeService.parse(params[:date_range])
     @transaction_type = params[:transaction_type] || "expense"
     @min_amount = params[:min_amount]&.to_f || 0
     # Get category breakdown using your existing model methods
@@ -77,28 +77,6 @@ class FinancesController < ApplicationController
 
   private
 
-  def parse_date_range(date_range_param)
-    case date_range_param
-    when "last_month"
-      start_date = 1.month.ago.beginning_of_month
-      end_date = 1.month.ago.end_of_month
-    when "last_3_months"
-      start_date = 3.months.ago.beginning_of_month
-      end_date = Date.current.end_of_month
-    when "last_6_months"
-      start_date = 6.months.ago.beginning_of_month
-      end_date = Date.current.end_of_month
-    when "this_year"
-      start_date = Date.current.beginning_of_year
-      end_date = Date.current.end_of_year
-    else # 'this_month' or default
-      start_date = Date.current.beginning_of_month
-      end_date = Date.current.end_of_month
-    end
-
-    { start: start_date, end: end_date }
-  end
-
   def validate_file_upload
     @file_valid = true
 
@@ -123,7 +101,6 @@ class FinancesController < ApplicationController
       flash[:error] = "File too large. Please upload a CSV file smaller than 10MB"
       redirect_to root_path
       @file_valid = false
-      return
     end
   end
 
@@ -156,24 +133,22 @@ class FinancesController < ApplicationController
   end
 
   def get_file_path
-
     if params[:csv_file].present?
       # First request - validate and store file
       validate_file_upload
       return nil unless @file_valid # Error already set
 
       # Store file path in session for potential second request
-      temp_file = Tempfile.new(["csv_import", ".csv"])
+      temp_file = Tempfile.new([ "csv_import", ".csv" ])
       temp_file.binmode
       temp_file.write(params[:csv_file].read)
       temp_file.close
       session[:csv_file_path] = temp_file.path
       session[:csv_file_name] = params[:csv_file].original_filename
 
-      return session[:csv_file_path]
+      session[:csv_file_path]
 
     elsif session[:csv_file_path].present?
-      
       # Second request (force proceed) - use stored path
       unless File.exist?(session[:csv_file_path])
         flash[:error] = "File session expired. Please upload your CSV again."
@@ -181,13 +156,13 @@ class FinancesController < ApplicationController
         return nil
       end
 
-      return session[:csv_file_path]
+      session[:csv_file_path]
 
     else
       # No file in request or session
       flash[:error] = "Please select a CSV file to import"
       redirect_to root_path
-      return nil
+      nil
     end
   end
 

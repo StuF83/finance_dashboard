@@ -45,3 +45,6 @@
 !/app/assets/builds/.keep
 
 /node_modules
+
+# Claude instructions
+/CLAUDE.md

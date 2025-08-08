@@ -268,7 +268,16 @@
 
 // CSV Import Form Styles
 .csv-import-form { 
-  display: inline; 
+  display: inline;
+  
+  @include respond-to('md') {
+    display: block;
+    width: 100%;
+    
+    .btn {
+      width: 100%;
+    }
+  }
 }
 
 .csv-file-input { 
