@@ -34,6 +34,8 @@
 // Button Components using mixins
 .btn {
   @include button-base($neutral-color);
+  position: relative;
+  overflow: hidden;
 
   &.btn-primary {
     @include button-base($primary-color);
@@ -41,6 +43,16 @@
 
   &.btn-secondary {
     @include button-base($secondary-color);
+    
+    &:hover {
+      background: darken($secondary-color, 8%);
+      transform: translateY(-1px);
+      box-shadow: $shadow-sm;
+    }
+
+    &:active {
+      transform: translateY(0);
+    }
   }
 
   &.btn-success {
@@ -49,6 +61,16 @@
 
   &.btn-danger {
     @include button-base($danger-color);
+    
+    &:hover {
+      background: darken($danger-color, 10%);
+      transform: translateY(-1px);
+      box-shadow: $shadow-sm;
+    }
+
+    &:active {
+      transform: translateY(0);
+    }
   }
 
   // Button sizes
@@ -60,6 +82,34 @@
   &.btn-lg {
     padding: $spacing-md $spacing-xl;
     font-size: $font-size-lg;
+  }
+
+  // Loading state (for form submissions)
+  &[data-disable-with] {
+    &:disabled {
+      opacity: 0.7;
+      cursor: not-allowed;
+      
+      &::after {
+        content: "";
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 16px;
+        height: 16px;
+        margin: -8px 0 0 -8px;
+        border: 2px solid transparent;
+        border-top-color: currentColor;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+      }
+    }
+  }
+
+  // Icon + text alignment
+  &.btn-with-icon {
+    @include flex-center;
+    gap: $spacing-xs;
   }
 }
 
@@ -282,4 +332,144 @@
 
 .csv-file-input { 
   display: none; 
+}
+
+// ===========================================
+// TRANSACTION COMPONENTS (REUSABLE)
+// ===========================================
+
+// Amount styling
+.amount-positive {
+  color: $success-color;
+  font-weight: 600;
+}
+
+.amount-negative {
+  color: $danger-color;
+  font-weight: 600;
+}
+
+// Type badges
+.type-badge {
+  padding: 4px 8px;
+  border-radius: $border-radius-pill;
+  font-size: $font-size-xs;
+  font-weight: 500;
+  
+  &.type-income {
+    background: $success-bg;
+    color: $success-text;
+  }
+  
+  &.type-expense {
+    background: $danger-bg;
+    color: $danger-text;
+  }
+}
+
+// ===========================================
+// SELECTION ACTIONS BAR (ENHANCED)
+// ===========================================
+
+.actions-bar {
+  position: sticky;
+  top: 0;
+  background: $warning-bg;
+  padding: $spacing-sm $spacing-md;
+  border: 1px solid $warning-border;
+  border-radius: $border-radius;
+  margin-bottom: $spacing-md;
+  z-index: 100;
+  box-shadow: $shadow-sm;
+  transition: all $transition-base;
+  
+  // Always reserve the space but make invisible
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-10px);
+  @include flex-between;
+
+  &.show {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+    animation: slideIn 0.3s ease-out;
+  }
+
+  .selected-count {
+    @include flex-center;
+    font-weight: 600;
+    color: $text-dark;
+    gap: $spacing-xs;
+
+    &::before {
+      content: "✓";
+      background: $warning-border;
+      color: $text-dark;
+      border-radius: 50%;
+      width: 20px;
+      height: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: $font-size-xs;
+      font-weight: bold;
+    }
+  }
+
+  .actions-container {
+    @include flex-center;
+    gap: $spacing-sm;
+  }
+
+  .btn {
+    margin-left: 0;
+    padding: $spacing-xs $spacing-md;
+    font-size: $font-size-sm;
+    border-radius: $border-radius-sm;
+    transition: all $transition-fast;
+    border: 1px solid transparent;
+  }
+
+  // Mobile responsive adjustments
+  @include mobile-only {
+    padding: $spacing-sm;
+    flex-direction: column;
+    gap: $spacing-sm;
+
+    .selected-count {
+      font-size: $font-size-sm;
+    }
+
+    .actions-container {
+      width: 100%;
+      justify-content: center;
+    }
+
+    .btn {
+      flex: 1;
+      min-width: 120px;
+    }
+  }
+}
+
+// ===========================================
+// ANIMATIONS
+// ===========================================
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }

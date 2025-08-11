@@ -1,27 +1,36 @@
 Rails.application.routes.draw do
-  get "finances/index"
-  # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
-
-  # Reveal health status on /up that returns 200 if the app boots with no exceptions, otherwise 500.
-  # Can be used by load balancers and uptime monitors to verify that the app is live.
+  # Health check endpoint
   get "up" => "rails/health#show", as: :rails_health_check
 
-  # Render dynamic PWA files from app/views/pwa/* (remember to link manifest in application.html.erb)
-  # get "manifest" => "rails/pwa#manifest", as: :pwa_manifest
-  # get "service-worker" => "rails/pwa#service_worker", as: :pwa_service_worker
-
-  # Defines the root path route ("/")
+  # Root route - Dashboard
   root "finances#index"
 
+  # ===========================================
+  # FINANCES (Dashboard & Analysis)
+  # ===========================================
   resources :finances, only: [:index] do
     collection do
-      post :import_csv
-      get :categories           # New route for category breakdown
+      get :categories           # Category breakdown page
       get :category_details     # AJAX endpoint for detailed view
+      post :import         # CSV import functionality
     end
   end
 
-  get "finances", to: "finances#index"
+  # ===========================================
+  # TRANSACTIONS (CRUD Operations)
+  # ===========================================
+  resources :transactions, only: [:index, :destroy] do
+    collection do
+      delete :bulk_destroy      # Bulk delete transactions
+    end
+  end
 
-  post "transactions/import", to: "finances#import", as: "transactions_import"
+  # Legacy import route (consider deprecating)
+  # post "transactions/import", to: "finances#import", as: "transactions_import"
+
+  # ===========================================
+  # PWA ROUTES (Currently disabled)
+  # ===========================================
+  # get "manifest" => "rails/pwa#manifest", as: :pwa_manifest
+  # get "service-worker" => "rails/pwa#service_worker", as: :pwa_service_worker
 end

@@ -19,10 +19,9 @@
   font-size: $font-size-base;
   background: $bg-color;
   color: $text-color;
-
   font-family: inherit;
   line-height: inherit;
-
+  
   &:hover {
     background: darken($bg-color, 8%);
     color: $text-color;
@@ -70,4 +69,82 @@
   font-weight: bold;
   color: $color;
   margin: 0 0 $spacing-sm 0;
+}
+
+// ===========================================
+// NEW MIXINS FOR TRANSACTIONS
+// ===========================================
+
+// Container mixin for consistent page layout
+@mixin page-container {
+  max-width: $container-max-width;
+  margin: 0 auto;
+  padding: 0 $spacing-md;
+}
+
+// Table styling mixin
+@mixin data-table {
+  width: 100%;
+  background: $bg-primary;
+  border-radius: $border-radius;
+  overflow: hidden;
+  box-shadow: $shadow-sm;
+  
+  th, td {
+    padding: $spacing-sm $spacing-md;
+    text-align: left;
+    border-bottom: 1px solid $border-color;
+  }
+  
+  th {
+    background: $bg-secondary;
+    font-weight: 600;
+    color: $text-dark;
+  }
+  
+  tr:hover {
+    background: $bg-secondary;
+  }
+}
+
+// Status badge mixin
+@mixin status-badge($bg-color, $text-color) {
+  padding: 4px 8px;
+  border-radius: $border-radius-pill;
+  font-size: $font-size-xs;
+  font-weight: 500;
+  background: $bg-color;
+  color: $text-color;
+}
+
+// Mobile-first responsive mixins (addition to your existing ones)
+@mixin mobile-only {
+  @media (max-width: $breakpoint-md - 1px) {
+    @content;
+  }
+}
+
+@mixin tablet-up {
+  @media (min-width: $breakpoint-md) {
+    @content;
+  }
+}
+
+// Flex utilities for card layouts
+@mixin flex-between {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+@mixin flex-center {
+  display: flex;
+  align-items: center;
+}
+
+// Sticky positioning mixin
+@mixin sticky-bar($top: 0, $z-index: 10) {
+  position: sticky;
+  top: $top;
+  z-index: $z-index;
 }

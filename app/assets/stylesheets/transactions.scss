@@ -1,6 +1,127 @@
 @import 'variables';
 @import 'mixins';
 
+// ===========================================
+// TRANSACTIONS INDEX PAGE
+// ===========================================
+
+.transactions-container {
+  @include page-container;
+}
+
+.transactions-header {
+  @include flex-between;
+  margin-bottom: $spacing-lg;
+
+  h1 {
+    margin: 8px 0 0 0;
+    color: $text-primary;
+  }
+}
+
+// ===========================================
+// DATE GROUPING
+// ===========================================
+
+.date-group {
+  margin-bottom: $spacing-xl;
+}
+
+.date-header {
+  background: $bg-primary;
+  padding: $spacing-sm $spacing-md;
+  border-radius: $border-radius-lg $border-radius-lg 0 0;
+  border-bottom: 2px solid $border-color;
+  font-weight: 600;
+  color: $text-dark;
+}
+
+// ===========================================
+// DESKTOP TABLE
+// ===========================================
+
+.transactions-table {
+  @include data-table;
+  border-radius: 0 0 $border-radius-lg $border-radius-lg;
+  
+  @include mobile-only {
+    display: none;
+  }
+}
+
+.checkbox-cell {
+  width: 40px;
+}
+
+// ===========================================
+// MOBILE CARDS
+// ===========================================
+
+.mobile-cards {
+  display: none;
+  
+  @include mobile-only {
+    display: block;
+  }
+}
+
+// Mobile date controls (select all for mobile)
+.mobile-date-controls {
+  @include flex-center;
+  gap: $spacing-xs;
+  padding: $spacing-sm $spacing-md;
+  background: $bg-light;
+  border-radius: $border-radius-sm;
+  margin-bottom: $spacing-sm;
+  border: 1px solid $border-color;
+
+  .select-all-label {
+    font-size: $font-size-sm;
+    color: $text-secondary;
+    font-weight: 500;
+    cursor: pointer;
+    user-select: none;
+    margin: 0;
+  }
+
+  input[type="checkbox"] {
+    margin: 0;
+    cursor: pointer;
+  }
+}
+
+.transaction-card {
+  @include card-base($spacing-md);
+  margin-bottom: $spacing-xs;
+  box-shadow: $shadow-xs;
+}
+
+.card-row {
+  @include flex-between;
+  margin-bottom: $spacing-xs;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+.card-description {
+  @include text-truncate(200px);
+  font-weight: 600;
+  margin-right: $spacing-sm;
+}
+
+.card-meta-info {
+  @include flex-center;
+  font-size: $font-size-sm;
+  color: $text-muted;
+  gap: $spacing-xs;
+}
+
+// ===========================================
+// DASHBOARD RECENT TRANSACTIONS SECTION
+// ===========================================
+
 .recent-transactions {
   margin-bottom: $spacing-xxl;
 
@@ -8,86 +129,97 @@
     color: $text-primary;
     margin-bottom: $spacing-md;
   }
-}
 
-.transactions-table {
-  @include card-base($padding: 0);
-  overflow: hidden;
+  // Dashboard version uses grid layout
+  .transactions-table {
+    @include card-base($padding: 0);
 
-  .table-header {
-    @include grid-layout(100px 1fr 150px 120px, $spacing-md);
-    padding: $spacing-md;
-    background: $bg-light;
-    font-weight: 600;
-    color: $text-primary;
-    border-bottom: 1px solid #dee2e6;
-  }
-
-  .transaction-row {
-    @include grid-layout(100px 1fr 150px 120px, $spacing-md);
-    padding: $spacing-md;
-    border-bottom: 1px solid #f1f3f4;
-    align-items: center;
-    transition: background-color $transition-fast;
-
-    &:last-child {
-      border-bottom: none;
-    }
-
-    &:hover {
+    .table-header {
+      @include grid-layout(100px 1fr 150px 120px, $spacing-md);
+      padding: $spacing-md;
       background: $bg-light;
-    }
-
-    .col-amount {
-      text-align: right;
       font-weight: 600;
+      color: $text-primary;
+      border-bottom: 1px solid #dee2e6;
+    }
 
-      &.income {
-        color: $income-color;
+    .transaction-row {
+      @include grid-layout(100px 1fr 150px 120px, $spacing-md);
+      padding: $spacing-md;
+      border-bottom: 1px solid #f1f3f4;
+      align-items: center;
+      transition: background-color $transition-fast;
+
+      &:last-child {
+        border-bottom: none;
       }
 
-      &.expense {
-        color: $expense-color;
+      &:hover {
+        background: $bg-light;
+      }
+
+      .col-amount {
+        text-align: right;
+        font-weight: 600;
+
+        &.income {
+          color: $income-color;
+        }
+
+        &.expense {
+          color: $expense-color;
+        }
+      }
+
+      .category-tag {
+        background: $bg-light;
+        padding: $spacing-xs $spacing-sm;
+        border-radius: $border-radius-lg;
+        font-size: $font-size-sm;
+        color: $text-secondary;
       }
     }
 
-    .category-tag {
-      background: $bg-light;
-      padding: $spacing-xs $spacing-sm;
-      border-radius: $border-radius-lg;
-      font-size: $font-size-sm;
-      color: $text-secondary;
-    }
-  }
-
-  // Responsive table
-  @include respond-to('md') {
-    .table-header,
-    .transaction-row {
-      grid-template-columns: 80px 1fr 100px 80px;
-      gap: $spacing-sm;
-      font-size: $font-size-sm;
-    }
-  }
-
-  @include respond-to('sm') {
-    .table-header,
-    .transaction-row {
-      grid-template-columns: 70px 1fr 70px;
-      gap: $spacing-xs;
-      font-size: $font-size-sm;
-      padding: 0.75rem;
+    // Responsive grid adjustments for dashboard
+    @include respond-to('md') {
+      .table-header,
+      .transaction-row {
+        grid-template-columns: 80px 1fr 100px 80px;
+        gap: $spacing-sm;
+        font-size: $font-size-sm;
+      }
     }
 
-    .col-category {
-      display: none;
+    @include respond-to('sm') {
+      .table-header,
+      .transaction-row {
+        grid-template-columns: 70px 1fr 70px;
+        gap: $spacing-xs;
+        font-size: $font-size-sm;
+        padding: 0.75rem;
+      }
+
+      .col-category {
+        display: none;
+      }
     }
   }
 }
 
-// Empty State
+// ===========================================
+// EMPTY STATE
+// ===========================================
+
 .empty-state {
   text-align: center;
   padding: $spacing-xxl;
   color: $text-muted;
+
+  h3 {
+    margin-bottom: $spacing-md;
+  }
+
+  p {
+    margin-bottom: $spacing-lg;
+  }
 }

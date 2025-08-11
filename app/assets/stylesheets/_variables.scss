@@ -1,25 +1,58 @@
-// Color Palette
+// ===========================================
+// COLOR PALETTE
+// ===========================================
+
+// Brand Colors
 $primary-color: #3498db;
 $secondary-color: #95a5a6;
-$success-color: #27ae60;
-$danger-color: #e74c3c;
-
-// Financial Colors
-$income-color: #27ae60;
-$expense-color: #e74c3c;
 $neutral-color: #95a5a6;
 
-// Text Colors
+// Status Colors
+$success-color: #27ae60;
+$danger-color: #e74c3c;
+$warning-color: #f39c12;
+$info-color: #3498db;
+
+// Financial Colors (using status colors for consistency)
+$income-color: $success-color;
+$expense-color: $danger-color;
+
+// Status Backgrounds & Text
+$success-bg: #d4edda;
+$success-text: #155724;
+$danger-bg: #f8d7da;
+$danger-text: #721c24;
+$warning-bg: #fff3cd;
+$warning-border: #ffeaa7;
+
+// ===========================================
+// TEXT COLORS
+// ===========================================
+
 $text-primary: #2c3e50;
 $text-secondary: #34495e;
-$text-muted: #7f8c8d;
+$text-dark: #495057;
+$text-muted: #6c757d;
 
-// Background Colors
+// ===========================================
+// BACKGROUND COLORS
+// ===========================================
+
 $bg-primary: #ffffff;
 $bg-secondary: #f8f9fa;
 $bg-light: #e9ecef;
+$background-light: #f8f9fa; // Keep for backwards compatibility
 
-// Spacing
+// ===========================================
+// BORDERS
+// ===========================================
+
+$border-color: #e9ecef;
+
+// ===========================================
+// SPACING
+// ===========================================
+
 $spacing-xs: 0.25rem;
 $spacing-sm: 0.5rem;
 $spacing-md: 1rem;
@@ -27,30 +60,56 @@ $spacing-lg: 1.5rem;
 $spacing-xl: 2rem;
 $spacing-xxl: 3rem;
 
-// Layout
+// ===========================================
+// LAYOUT
+// ===========================================
+
 $container-max-width: 1200px;
-$border-radius: 8px;
+
+// ===========================================
+// BORDER RADIUS
+// ===========================================
+
 $border-radius-sm: 4px;
+$border-radius: 8px;
+$border-radius-md: 8px; // Alias for consistency
 $border-radius-lg: 12px;
+$border-radius-pill: 12px;
 
-// Shadows
-$shadow-sm: 0 1px 3px rgba(0,0,0,0.1);
-$shadow-md: 0 2px 10px rgba(0,0,0,0.1);
-$shadow-lg: 0 4px 20px rgba(0,0,0,0.15);
+// ===========================================
+// SHADOWS
+// ===========================================
 
-// Typography
+$shadow-xs: 0 1px 3px rgba(0, 0, 0, 0.1);
+$shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.1);
+$shadow-md: 0 2px 10px rgba(0, 0, 0, 0.1);
+$shadow-lg: 0 4px 20px rgba(0, 0, 0, 0.15);
+
+// ===========================================
+// TYPOGRAPHY
+// ===========================================
+
 $font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-$font-size-sm: 0.8rem;
+
+// Font Sizes
+$font-size-xs: 0.75rem;  // 12px
+$font-size-sm: 0.875rem; // 14px  
 $font-size-base: 0.9rem;
 $font-size-lg: 1.1rem;
 $font-size-xl: 1.5rem;
 $font-size-xxl: 2rem;
 
-// Transitions
+// ===========================================
+// TRANSITIONS
+// ===========================================
+
 $transition-fast: 0.15s ease;
 $transition-base: 0.3s ease;
 
-// Breakpoints
+// ===========================================
+// BREAKPOINTS
+// ===========================================
+
 $breakpoint-sm: 480px;
 $breakpoint-md: 768px;
 $breakpoint-lg: 1024px;

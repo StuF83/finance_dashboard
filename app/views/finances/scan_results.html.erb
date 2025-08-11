@@ -53,7 +53,7 @@
   <div class="scan-actions">
     <% if @results[:total_processable] > 0 %>
       <!-- Proceed Anyway Form -->
-      <%= form_with url: transactions_import_path, local: true, class: "proceed-form" do |form| %>
+      <%= form_with url: import_finances_path, local: true, class: "proceed-form" do |form| %>
         <%= form.hidden_field :force_proceed, value: "true" %>
         
         <div class="proceed-warning">

@@ -1,0 +1,165 @@
+<div class="transactions-container" data-controller="transaction-selection">
+  <!-- Header with Back to Dashboard -->
+  <div class="transactions-header">
+    <div>
+      <%= link_to "← Back to Dashboard", finances_path, class: "back-link" %>
+      <h1 style="margin: 8px 0 0 0; color: #212529;">All Transactions</h1>
+    </div>
+  </div>
+
+  <!-- Selection Actions Bar (hidden until items selected) -->
+  <div class="actions-bar" 
+       id="actionsBar" 
+       data-transaction-selection-target="actionsBar">
+    <span data-transaction-selection-target="selectedCount">0 selected</span>
+    <%= button_to "Delete Selected", 
+        bulk_destroy_transactions_path, 
+        method: :delete, 
+        form: { 
+          id: "bulkDeleteForm", 
+          data: { 
+            transaction_selection_target: "bulkDeleteForm" 
+          } 
+        },
+        class: "btn btn-danger",
+        style: "margin-left: 16px;",
+        confirm: "Are you sure you want to delete the selected transactions?",
+        data: { disable_with: "Deleting..." } %>
+    <button type="button" 
+            class="btn btn-secondary" 
+            style="margin-left: 8px;" 
+            data-action="click->transaction-selection#clearSelection">
+      Clear Selection
+    </button>
+  </div>
+
+  <% if @transactions.any? %>
+    <% 
+    # Group transactions by date for display
+    grouped_transactions = @transactions.group_by(&:transaction_datetime)
+    today = Date.current
+    yesterday = Date.current - 1.day
+    %>
+
+    <% grouped_transactions.each do |date, transactions| %>
+      <div class="date-group">
+        <!-- Date Header -->
+        <div class="date-header">
+          <% if date == today %>
+            Today
+          <% elsif date == yesterday %>
+            Yesterday
+          <% else %>
+            <%= date.strftime("%B %d, %Y") %>
+          <% end %>
+        </div>
+        
+        <!-- Desktop Table -->
+        <table class="transactions-table">
+          <thead>
+            <tr>
+              <th class="checkbox-cell">
+                <input type="checkbox" 
+                       class="group-select-all" 
+                       data-date="<%= date.iso8601 %>"
+                       data-transaction-selection-target="groupSelectAll"
+                       data-action="change->transaction-selection#toggleGroupAll">
+              </th>
+              <th>Date</th>
+              <th>Description</th>
+              <th>Category</th>
+              <th>Amount</th>
+              <th>Type</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% transactions.each do |transaction| %>
+              <tr>
+                <td class="checkbox-cell">
+                  <%= check_box_tag "transaction_ids[]", 
+                      transaction.id, 
+                      false, 
+                      class: "transaction-checkbox",
+                      data: { 
+                        date: date.iso8601,
+                        transaction_selection_target: "transactionCheckbox",
+                        action: "change->transaction-selection#updateSelection"
+                      } %>
+                </td>
+                <td><%= transaction.transaction_datetime.strftime("%b %d, %Y") %></td>
+                <td><%= transaction.description %></td>
+                <td><%= transaction.category %></td>
+                <td class="<%= transaction.amount >= 0 ? 'amount-positive' : 'amount-negative' %>">
+                  <%= transaction.amount >= 0 ? '+' : '' %><%= number_to_currency(transaction.amount.abs, unit: '£') %>
+                </td>
+                <td>
+                  <span class="type-badge type-<%= transaction.transaction_type %>">
+                    <%= transaction.transaction_type.capitalize %>
+                  </span>
+                </td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+
+        <!-- Mobile Cards -->
+                <div class="mobile-cards">
+          <!-- Mobile Date Controls (Select All for this group) -->
+          <div class="mobile-date-controls">
+            <input type="checkbox" 
+                   class="group-select-all" 
+                   data-date="<%= date.iso8601 %>"
+                   data-transaction-selection-target="groupSelectAll"
+                   data-action="change->transaction-selection#toggleGroupAll"
+                   id="mobile-select-all-<%= date.iso8601 %>">
+            <label for="mobile-select-all-<%= date.iso8601 %>" class="select-all-label">
+              Select all for 
+              <% if date == today %>
+                today
+              <% elsif date == yesterday %>
+                yesterday
+              <% else %>
+                <%= date.strftime("%B %d") %>
+              <% end %>
+            </label>
+          </div>
+
+          <% transactions.each do |transaction| %>
+            <div class="transaction-card">
+              <div class="card-row">
+                <%= check_box_tag "transaction_ids[]", 
+                    transaction.id, 
+                    false, 
+                    class: "transaction-checkbox",
+                    data: { 
+                      date: date.iso8601,
+                      transaction_selection_target: "transactionCheckbox",
+                      action: "change->transaction-selection#updateSelection"
+                    } %>
+                <div class="card-description"><%= transaction.description %></div>
+                <div class="<%= transaction.amount >= 0 ? 'amount-positive' : 'amount-negative' %>">
+                  <%= transaction.amount >= 0 ? '+' : '' %><%= number_to_currency(transaction.amount.abs, unit: '£') %>
+                </div>
+              </div>
+              <div class="card-row">
+                <div class="card-meta-info">
+                  <span><%= transaction.category %></span>
+                  <span>•</span>
+                  <span class="type-badge type-<%= transaction.transaction_type %>">
+                    <%= transaction.transaction_type.capitalize %>
+                  </span>
+                </div>
+              </div>
+            </div>
+          <% end %>
+        </div>
+      </div>
+    <% end %>
+  <% else %>
+    <div class="empty-state">
+      <h3>No transactions found</h3>
+      <p>Import some transactions to get started.</p>
+      <%= link_to "Import Transactions", finances_path, class: "btn btn-primary" %>
+    </div>
+  <% end %>
+</div>

@@ -41,7 +41,34 @@ a {
   }
 }
 
-// Utility classes using variables
+// ===========================================
+// NAVIGATION COMPONENTS
+// ===========================================
+
+// Back link styling (used across multiple pages)
+.back-link {
+  color: $primary-color;
+  text-decoration: none;
+  font-weight: 500;
+  font-size: $font-size-base;
+  
+  &:hover {
+    text-decoration: underline;
+    color: darken($primary-color, 10%);
+  }
+
+  &:focus {
+    outline: 2px solid $primary-color;
+    outline-offset: 2px;
+    border-radius: $border-radius-sm;
+  }
+}
+
+// ===========================================
+// UTILITY CLASSES
+// ===========================================
+
+// Text alignment
 .text-center { text-align: center; }
 .text-right { text-align: right; }
 .text-left { text-align: left; }

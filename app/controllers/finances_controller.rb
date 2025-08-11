@@ -13,7 +13,7 @@ class FinancesController < ApplicationController
     @recent_transactions = Transaction.recent.limit(10)
   end
 
-    def import
+  def import
     begin
 
       # Handle file upload or retrieve from session

@@ -3,7 +3,7 @@
   <h3>Quick Actions</h3>
   <div class="action-buttons">
     <!-- File Upload Form with Stimulus Controller -->
-    <%= form_with url: transactions_import_path, multipart: true, local: true, 
+    <%= form_with url: import_finances_path, multipart: true, local: true, 
                   class: "csv-import-form", 
                   data: { controller: "csv-import" } do |form| %>
       
@@ -21,7 +21,7 @@
                      data: { action: "click->csv-import#triggerFileInput" } %>
     <% end %>
     
-    <%= link_to "View All Transactions", "#", class: "btn btn-secondary" %>
+    <%= link_to "View All Transactions", transactions_path, class: "btn btn-secondary" %>
     <%= link_to "Category Breakdown", categories_finances_path, class: "btn btn-secondary" %>
   </div>
 </div>
